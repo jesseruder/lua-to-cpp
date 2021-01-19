@@ -127,7 +127,7 @@ function handleNumericLiteral(block) {
 }
 
 function handleStringLiteral(block) {
-  return block.raw.replace(/\'/g, "");
+  return block.raw.replace(/\'/g, '"');
 }
 
 function handleNilLiteral(block) {
@@ -137,6 +137,10 @@ function handleNilLiteral(block) {
 function handleBinaryExpression(block) {
   if (block.operator == "~=") {
     block.operator = "!=";
+  }
+
+  if (block.operator == "..") {
+    block.operator = "+";
   }
 
   return (
@@ -455,6 +459,8 @@ async function runAsync() {
   for (let i = 0; i < cppFunctions.length; i++) {
     lines.push(
       "TYPE " +
+        className +
+        "::" +
         cppFunctions[i].definition +
         " {\n" +
         indentBlock(cppFunctions[i].body) +
@@ -462,7 +468,9 @@ async function runAsync() {
     );
   }
 
-  console.log(lines.join("\n\n"));
+  let result = lines.join("\n\n");
+
+  fs.writeFileSync("out.cpp", result);
 }
 
 runAsync().then(process.exit);
